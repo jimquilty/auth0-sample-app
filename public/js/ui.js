@@ -63,6 +63,8 @@ const updateUI = async () => {
     if (isAuthenticated) {
       const user = await auth0.getUser();
 
+      document.getElementById("btn-call-api").disabled = !isAuthenticated;
+      document.getElementById("order-pizza-content").classList.remove("hidden");
       document.getElementById("profile-data").innerText = JSON.stringify(
         user,
         null,

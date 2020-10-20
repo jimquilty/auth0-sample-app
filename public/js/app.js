@@ -50,7 +50,8 @@ const configureClient = async () => {
 
   auth0 = await createAuth0Client({
     domain: config.domain,
-    client_id: config.clientId
+    client_id: config.clientId,
+    audience: config.audience
   });
 };
 
@@ -67,6 +68,35 @@ const requireAuth = async (fn, targetUrl) => {
   }
 
   return login(targetUrl);
+};
+
+// Call API Function to Order Pizzas
+const callApi = async () => {
+  const user = await auth0.getUser();
+  if (user.email_verified == true) {
+    try {
+      const token = await auth0.getTokenSilently();
+      const response = await fetch("/api/external", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const responseData = await response.json();
+      const responseElement = document.getElementById("api-call-result");
+      if (responseData.msg == "success") {
+        responseElement.innerText = 'Success! Your driver Zaphod will be on his way shortly with your pizza.';
+        userOrder(token, user.user_id);
+      } else {
+        responseElement.innerText = 'Uh Oh! Something went wrong';
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  } else {
+      const responseElement = document.getElementById("api-call-result");
+      responseElement.innerText = "It looks like your email isn't verified. You need to have a verified email address to place an order. Please check your email and click the link to verify it.";
+  }
 };
 
 // Will run when page finishes loading
