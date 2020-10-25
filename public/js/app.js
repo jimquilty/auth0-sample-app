@@ -85,8 +85,30 @@ const callApi = async () => {
       const responseData = await response.json();
       const responseElement = document.getElementById("api-call-result");
       if (responseData.msg == "success") {
-        responseElement.innerText = 'Success! Your driver Zaphod will be on his way shortly with your pizza.';
-        userOrder(token, user.user_id);
+        responseElement.innerText = 'Your driver Zaphod will be on his way shortly with your pizza.';
+        
+        // Update Order History
+        const datetime = new Date();
+        const orderNum = "Order#_" + Math.floor(100000 + Math.random() * 900000)
+        const userInfo = {
+          'userid': user.sub,
+          'datetime': datetime,
+          'ordernum': orderNum
+        }
+
+        const histResponse = await fetch("/api/orderhistory", {
+          method: 'POST',
+          body: JSON.stringify(userInfo),
+          headers: {
+            'content-type': 'application/json'
+          }
+        });
+        const histResponseData = await histResponse.json();
+        if (histResponseData.msg == "recorded") {
+          const histResponseElement = document.getElementById("info-update-result");
+          histResponseElement.innerText = "Thank you for your order! Your order number is: " + orderNum
+        }
+
       } else {
         responseElement.innerText = 'Uh Oh! Something went wrong';
       }
