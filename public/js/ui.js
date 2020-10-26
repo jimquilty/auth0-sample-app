@@ -63,10 +63,29 @@ const updateUI = async () => {
     if (isAuthenticated) {
       const user = await auth0.getUser();
 
+      // Get User Order History
+      const userInfo = {
+        'userid': user.sub,
+      }
+
+      const orderHistory = await fetch("/api/uoh", {
+        method: 'POST',
+        body: JSON.stringify(userInfo),
+        headers: {
+          'content-type': 'application/json'
+        }
+      });
+      const orderHistoryResponse = await orderHistory.json()
+
       document.getElementById("btn-call-api").disabled = !isAuthenticated;
       document.getElementById("order-pizza-content").classList.remove("hidden");
       document.getElementById("profile-data").innerText = JSON.stringify(
         user,
+        null,
+        2
+      );
+      document.getElementById("user-order-history").innerText = JSON.stringify(
+        orderHistoryResponse.msg.app_metadata,
         null,
         2
       );

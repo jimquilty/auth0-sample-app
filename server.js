@@ -43,7 +43,7 @@ function recHist(callback) {
 
 };
 
-// Order History Endpoint
+// API Endpoint to Record User History
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.raw());
@@ -85,6 +85,40 @@ app.post("/api/orderhistory", (req, res) => {
       }
     });
   })
+});
+
+// API Endpoint to get User Order History
+app.post("/api/uoh", (req, res) => {
+  const bodyData = req.body
+  const user_id = bodyData.userid
+
+  recHist(function(result){
+    const options = { 
+      method: 'GET',
+      json: true,
+      url: 'https://dev-9obe8yjx.us.auth0.com/api/v2/users/' + user_id + '?fields=app_metadata&include_fields=true',
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+        'authorization': 'Bearer ' + result
+      }
+    }
+
+    request(options, function(error, response, body) {
+      if (!error && response.statusCode == 200) {
+        // console.log(body)
+        res.send({
+          msg: body,
+        })
+      } else {
+        console.log(error)
+        res.send({
+          msg: "error"
+        })
+      }
+    });
+  })
+
 });
 
 // API Endpoint
